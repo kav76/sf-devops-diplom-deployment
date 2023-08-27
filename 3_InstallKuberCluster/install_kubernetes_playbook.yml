@@ -1,0 +1,71 @@
+---
+- name: Install Kubernetes
+  hosts: master, nodes
+  become: true
+  tasks:
+    - name: Add Kubernetes apt-key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: Install Kubernetes components
+      ansible.builtin.apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: latest
+        update_cache: true
+
+    - name: Install CRI
+      ansible.builtin.apt:
+        deb: https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.4/cri-dockerd_0.3.4.3-0.ubuntu-jammy_amd64.deb
+        state: present
+
+
+- name: Install Helm
+  hosts: master
+  become: true
+  gather_facts: false
+  vars:
+    tmp_dir: "/tmp/helm_install"
+    helm_download_url: "https://get.helm.sh/helm-v3.12.3-linux-amd64.tar.gz"
+    arc_name: "helm-v3.12.3-linux-amd64.tar.gz"
+  tasks:
+    - name: Install Wget
+      ansible.builtin.apt:
+        name: wget
+        state: latest
+        update_cache: true
+
+    - name: Make temp directory
+      ansible.builtin.file:
+        path: '{{ tmp_dir }}'
+        state: directory
+        mode: '0755'
+
+    - name: Download Helm
+      ansible.builtin.shell: cd {{ tmp_dir }} && wget {{ helm_download_url }}
+
+    - name: Extract Helm from archive
+      ansible.builtin.unarchive:
+        src: '{{ tmp_dir }}/{{ arc_name }}'
+        dest: '{{ tmp_dir }}/'
+        remote_src: yes
+      
+    - name: Copy Helm to /usr/local/bin
+      ansible.builtin.copy:
+        src: '{{ tmp_dir }}/linux-amd64/helm'
+        dest: /usr/bin/
+        mode: '0755'
+        remote_src: yes
+
+    - name: Recursively remove temp directory
+      ansible.builtin.file:
+        path: '{{ tmp_dir }}'
+        state: absent

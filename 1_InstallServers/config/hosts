@@ -1,0 +1,4 @@
+127.0.0.1   localhost.local localhost
+10.128.0.3  master.local master
+10.128.0.4  app-1.local app-1
+10.128.0.5  management.loca management

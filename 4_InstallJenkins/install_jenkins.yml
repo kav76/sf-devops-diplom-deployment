@@ -1,0 +1,67 @@
+---
+- name: Install Jenkins
+  hosts: management
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Download repo keys
+      ansible.builtin.shell: curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+#    - name: Add a Jenkins apt repository
+#      ansible.builtin.shell: echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+    - name: Add repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        state: present
+        filename: jenkins
+
+
+    - name: Update the apt package index
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Install JDK and Fontconfig
+      ansible.builtin.apt:
+        name:
+          - fontconfig
+          - openjdk-11-jre
+        state: latest
+
+    - name: Install Jenkins
+      ansible.builtin.apt:
+        name:
+          - jenkins
+        state: latest
+
+    - name: Add jenkins to docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Start Jenkins
+      ansible.builtin.systemd:
+        state: started
+        daemon_reload: true
+        name: jenkins
+
+    - name: Install additional soft for Ansible
+      ansible.builtin.apt:
+        name:
+          - software-properties-common
+        state: latest
+
+    - name: Add Ansible repo
+      ansible.builtin.shell: add-apt-repository --yes --update ppa:ansible/ansible
+
+    - name: Install Ansible
+      ansible.builtin.apt:
+        name:
+          - ansible
+        state: latest  
+        update_cache: true
+    

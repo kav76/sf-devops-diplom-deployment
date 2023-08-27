@@ -1,0 +1,22 @@
+---
+- name: Make join file for Kubernetes Cluster
+  hosts: master
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Get join string
+      command: kubeadm token create --print-join-command
+      register: kubeadm_output
+      changed_when: false
+
+- name: Save join file for Kubernetes Cluster
+  hosts: master
+  become: false
+  gather_facts: false
+  tasks:  
+    - name: Save join command
+      ansible.builtin.template:
+        src: ./templates/kubeadm.j2
+        dest: kubeadm_join.sh
+        mode: '0644'
+      delegate_to: localhost

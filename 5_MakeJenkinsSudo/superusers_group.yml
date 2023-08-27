@@ -1,0 +1,25 @@
+- name: Create Superusers group and add users into it
+  gather_facts: false
+  hosts: management
+  vars:
+    users: [jenkins]
+  tasks:
+  - name: Ensure group "superusers" exists
+    group:
+      name: sudo
+      state: present
+  - name: Add users to superusers group
+    user:
+      name: "{{ item }}"
+      groups: sudo
+      append: yes
+    loop: "{{ users }}"
+  - name: Validate the sudoers file before saving
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '^%SUDO ALL='
+      line: '%SUDO ALL=(ALL:ALL) NOPASSWD: ALL'
+      validate: /usr/sbin/visudo -cf %s
+
+

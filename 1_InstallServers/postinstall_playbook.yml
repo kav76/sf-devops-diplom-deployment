@@ -1,0 +1,13 @@
+---
+- name: Set hostnames
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Replace a /etc/hosts file
+      ansible.builtin.copy:
+        src: ./config/hosts
+        dest: /etc/hosts
+        owner: 'root'
+        group: 'root'
+        mode: '0644'

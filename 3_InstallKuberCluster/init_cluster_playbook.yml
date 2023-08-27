@@ -1,0 +1,27 @@
+---
+- name: Initialize Kubernetes Cluster
+  hosts: master
+  become: true
+  gather_facts: true
+  tasks:    
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --apiserver-advertise-address=10.128.0.3 --cri-socket=unix:///var/run/cri-dockerd.sock  --pod-network-cidr=10.32.0.0/12
+#      command: kubeadm init --apiserver-advertise-address=10.128.0.3 --cri-socket=unix:///var/run/containerd/containerd.sock --pod-network-cidr=10.32.0.0/12
+      changed_when: false
+
+
+    - name: Save KUBECONFIG to environment config
+      lineinfile:
+        path: /etc/environment
+        line: "export KUBECONFIG=/etc/kubernetes/admin.conf"
+
+    - name: Export KUBECONFIG
+      ansible.builtin.shell: export KUBECONFIG=/etc/kubernetes/admin.conf
+      args:
+        executable: /usr/bin/bash      
+
+    - name: Install Container Networking Interface
+#      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      command: kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+      changed_when: false
+

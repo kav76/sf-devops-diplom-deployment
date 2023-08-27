@@ -1,0 +1,15 @@
+---
+- name: Join Application Nodes to Kubernetes Cluster
+  hosts: nodes
+  become: true
+  tasks:
+    - name: Copy join command script
+      ansible.builtin.copy:
+        src: ./kubeadm_join.sh
+        dest: /home/{{ ansible_user }}/kubeadm_join.sh
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        mode: '0744'
+
+    - name: Execute join command
+      command: /home/{{ ansible_user }}/kubeadm_join.sh
