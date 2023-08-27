@@ -8,12 +8,14 @@
     group:
       name: sudo
       state: present
+
   - name: Add users to superusers group
     user:
       name: "{{ item }}"
       groups: sudo
       append: yes
     loop: "{{ users }}"
+    
   - name: Validate the sudoers file before saving
     lineinfile:
       path: /etc/sudoers

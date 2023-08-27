@@ -1,2 +1,0 @@
-#!/usr/bin/bash
-sudo kubeadm join 10.128.0.3:6443 --token nxxjg5.qraaxffmufznnldy --discovery-token-ca-cert-hash sha256:44ab959d1bcbfd27df3f70319089c6f2414edd0786c113d73e228b86d0e6e9c5  --cri-socket=unix:///var/run/cri-dockerd.sock
