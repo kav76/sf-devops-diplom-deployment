@@ -162,3 +162,25 @@ cd ../5_MakeJenkinsSudo
 Процесс установки и настройки инфраструктуры завершен.
 
 Для настройки деплоя приложения смотрите [Руководство]()
+
+## Установка мониторинга Zabbix
+Перейдите в каталог `6_InstallMonitoring`
+```
+cd ../6_InstallMonitoring
+```
+Откройте в текстовом редакторе файл `playbook.yml` и в параметре hosts: укажите группы серверов, на которые необходимо установить сервер `Zabbix`. В нашей схеме это группа `management`. Отредактируйте файл `inventory`, указав ip адреса серверов из указанных групп. 
+Расшифруйте файл с паролями `vaulted_vars.vlt`. 
+```
+ansible-vault decrypt --ask-vault-password --output vaulted_vars.txt vaulted_vars.vlt
+```
+Выполните скрипт `runme.sh` с ключем, указывающим, что будете устанавливать на серверы - `Zabbix-server` или `Zabbix-agent`.
+Для установки Zabbix-server'а:
+```
+./runme.sh Zabbix-server
+```
+Для установки Zabbix-agent'а:
+```
+./runme.sh Zabbix-agent
+```
+При установке Zabbix сервера Agent установится автоматически.
+После завершения процесса установки выполните настройки базы данных в соответствии с [инструкцией](https://www.zabbix.com/ru/download?zabbix=6.0&os_distribution=ubuntu&os_version=22.04&components=server_frontend_agent&db=mysql&ws=nginx) разработчика.

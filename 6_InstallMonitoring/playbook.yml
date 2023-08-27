@@ -1,0 +1,86 @@
+---
+- name: install Zabbix
+  hosts: management
+  gather_facts: true
+  become: true
+  vars_files:
+    - vaulted_vars.txt
+  tasks:
+
+    - name: Get Zabbix Repo from Official web site
+      ansible.builtin.shell: wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-4+ubuntu22.04_all.deb
+      tags:
+        - Zabbix-server
+        - Zabbix-agent
+
+    - name: Install Official Zabbix Repo
+      ansible.builtin.shell: dpkg -i ./zabbix-release_6.0-4+ubuntu22.04_all.deb
+      tags:
+        - Zabbix-server
+        - Zabbix-agent
+
+    - name: Remove Repo bin
+      ansible.builtin.file:
+        path: ./zabbix-release_6.0-4+ubuntu22.04_all.deb
+        state: absent
+      tags:
+        - Zabbix-server
+        - Zabbix-agent
+
+    - name: Update the apt package index
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+      tags:
+        - Zabbix-agent
+        - Zabbix-server
+
+    - name: Install Zabbix Agent
+      ansible.builtin.apt:
+        name:
+          - zabbix-agent
+        state: latest
+        update_cache: true
+      tags:
+        - Zabbix-agent
+
+    - name: Install Zabbix Server
+      ansible.builtin.apt:
+        name:
+          - zabbix-server-mysql
+          - zabbix-frontend-php
+          - zabbix-nginx-conf
+          - zabbix-sql-scripts
+          - zabbix-agent
+        state: latest
+        update_cache: true
+      tags:
+        - Zabbix-server
+    
+    - name: Start Mysql Server
+      ansible.builtin.systemd:
+        name: mysql
+        state: started
+        daemon_reload: true
+      tags:
+        - Zabbix-server
+
+    - name: Start Zabbix Server
+      ansible.builtin.systemd:
+        name: zabbix-server
+        state: started
+        daemon_reload: true
+      tags:
+        - Zabbix-server
+
+    - name: Start Zabbix Agent
+      ansible.builtin.systemd:
+        name: zabbix-agent
+        state: started
+        daemon_reload: true
+      tags:
+        - Zabbix-server
+        - Zabbix-agent
+

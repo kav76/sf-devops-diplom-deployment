@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+sudo {{ kubeadm_output.stdout_lines[-1] }} --cri-socket=unix:///var/run/cri-dockerd.sock
